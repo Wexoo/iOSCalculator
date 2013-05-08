@@ -27,36 +27,57 @@
     [self.programStack addObject:[NSNumber numberWithDouble:operand]];
 }
 
-- (double)popOperand
-{
-    NSNumber *operandObject = [self.programStack lastObject];
-    if(operandObject)[self.programStack removeLastObject];
-    return [operandObject doubleValue];
-}
-
 - (double)performOperation:(NSString *)operation
 {
     
-    //[self.programStack addObject:operation];
-    //[CalculatorBrain runProgram:self.program];
+    [self.programStack addObject:operation];
+    return [CalculatorBrain runProgram:self.program];
+}
 
+- (id) program
+{
+    return [self.programStack copy];
+}
+
++ (NSString *) descriptionOfProgram:(id)program
+{
+    return @"Implement this in assignment 2";
+}
+
++ (double) popOperandOffStack:(NSMutableArray *)stack
+{
     double result = 0;
     
-    if([operation isEqualToString:@"+"]){
-        result = [self popOperand] + [self popOperand];
-    } else if([@"*" isEqualToString:operation]){
-        result = [self popOperand] * [self popOperand];
-    }else if([@"-" isEqualToString:operation]){
-        result = [self popOperand] - [self popOperand];
-    }else if([@"/" isEqualToString:operation]){
-        result = [self popOperand] / [self popOperand];
-    }
+    id topOfStack = [stack lastObject];
+    if(topOfStack) [stack removeLastObject];
     
-    [self pushOperand:result];
+    if([topOfStack isKindOfClass:[NSNumber class]]){
+        result = [topOfStack doubleValue];
+        
+    }else if ([topOfStack isKindOfClass:[NSString class]]){
+        NSString *operation = topOfStack;
+        
+        if([operation isEqualToString:@"+"]){
+            result = [self popOperandOffStack:stack] + [self popOperandOffStack:stack];
+        } else if([@"*" isEqualToString:operation]){
+            result = [self popOperandOffStack:stack] * [self popOperandOffStack:stack];
+        }else if([@"-" isEqualToString:operation]){
+            result = [self popOperandOffStack:stack] - [self popOperandOffStack:stack];
+        }else if([@"/" isEqualToString:operation]){
+            result = [self popOperandOffStack:stack] / [self popOperandOffStack:stack];
+        }
+    }
     
     return result;
 }
 
-
-
++ (double) runProgram:(id)program
+{
+    NSMutableArray *stack;
+    if([program isKindOfClass:[NSArray class]])
+    {
+        stack = [program mutableCopy];
+    }
+    return [self popOperandOffStack:stack];
+}
 @end
